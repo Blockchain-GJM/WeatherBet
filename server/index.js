@@ -4,18 +4,21 @@ const cors = require('cors')
 require('dotenv/config')
 
 
-const ETFModel = require("./models/Etf")
-const userModel = require("./models/User")
+const DB_URI  ="mongodb+srv://admin:Blockchain123456@cluster0.yr4jd.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+const PORT = 3001
+
+//const data_name = require("./models/data_name")
 
 const app = express()
 app.use(express.json())
 app.use(cors())
 
 mongoose.connect(
-    process.env.DB_URI
+    DB_URI
 )
 
 //add ETF to database
+//remove later
 app.post('/addETF', async (req, res) => {
 
     const ETFname = req.body.name;
@@ -33,6 +36,7 @@ app.post('/addETF', async (req, res) => {
 })
 
 //parse all ETFs
+//dummy etf stuff
 app.get('/alllETFs', async (req, res) => {
 
     ETFModel.find({}, (err, result) =>{
@@ -45,7 +49,6 @@ app.get('/alllETFs', async (req, res) => {
 })
 
 
-const PORT = proceess.env.PORT || 3001
 app.listen(PORT, ()=>{
     console.log("Server running on port ${PORT}")
 });

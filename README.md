@@ -46,3 +46,4 @@ Purpose of the Smart Contract is to hold the funds of the bet, set odds and payo
 1. Initialize new smartcontract for each day at 12pm EST
 2. Store all contract addresses for days.
    1. MongoDB: `day:address`
+3. Get Weather data for day `D`

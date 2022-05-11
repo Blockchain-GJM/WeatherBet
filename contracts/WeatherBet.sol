@@ -138,6 +138,10 @@ contract WeatherBet {
         }
     }
 
+    function setExpired() public restricted {
+        expired = true;
+    }
+
     function cancelBet() public restricted {
         sendOriginalBetBackToRain();
         sendOriginalBetBackToNoRain();

@@ -1,14 +1,18 @@
 import React, { Component } from "react";
 import axios from 'axios';
 
+import payment from './Payment';
+
 import './App.css';
 
+//0x13Bd352EcbbfD9Ccc7D4150d57D835600FB18c00
 
 class App extends Component{
 
   constructor(props) {
       super(props)
-      this.state = {input: 0, choose_rain: true, wallet: null, network_id: null, odds: null}
+      this.state = {input: "0", choose_rain: true, wallet: null, network_id: null, payout:0,
+                    contract:null}
   }
 
   checkWallet = () => {
@@ -71,19 +75,59 @@ class App extends Component{
     }
   }
 
-  handleBet = () => {
-    console.log("Sent Bet")
-    axios.post("http://localhost:3001/bet", {params: this.state})
-      .then(res => {
-        console.log(res.data)
-      })
+  handleBet = event => {
+    event.preventDefault()
+    var amt = this.state.input
+    var rain_chosen = this.state.choose_rain
+
+    console.log(amt)
+    console.log(rain_chosen)
+    
+    payment.approve(this.state.wallet, amt)
+      .then((res)=>{console.log(res)})
+
+
   }
 
   getOdds = event => {
     event.preventDefault()
+
+    //check validity of input
+    if(isNaN(+(this.state.input))){
+      console.log("Invalid Input")
+      return
+    }
+
     console.log("Requesting Odds")
-    axios.get("http://localhost:3001/odds", {params: {rain_chosen: this.state.choose_rain}})
-      .then(res => this.setState({odds: res.data}))
+    axios.get("http://localhost:3001/odds")
+      .then(res => this.handleOddsJson(res))
+  }
+
+  handleOddsJson = (input) => {
+    var data = input.data
+    this.setState({contract:data.contract})
+
+    var win_bet = 0.0
+    var lose_bet = 0.0
+
+    if(this.state.choose_rain){
+      win_bet = data.rain
+      lose_bet = data.norain
+    } else {
+      lose_bet = data.rain
+      win_bet = data.norain
+    }
+
+    if(lose_bet == 0){
+      this.setState({payout: 0})
+      return
+    }
+
+
+
+    var payout = parseFloat(this.state.input) + lose_bet*(this.state.input*1.0/win_bet)
+
+    this.setState({payout: payout})
   }
 
   render(){
@@ -108,13 +152,14 @@ class App extends Component{
 
         <div className="bet-container">
 
-          <form className="input-container">
+          <form className="input-container" onSubmit={e => this.handleBet(e)}>
             <label className="input-label">Betting Amount</label>
             
             <div className="spacer"></div>
 
             <input
                 type="number"
+                name="betAmount"
                 step="0.01"
                 min="0.01"
                 placeholder="ComputeCoin Input"
@@ -124,7 +169,7 @@ class App extends Component{
             
             <div className="spacer"></div>
 
-            <select id="betChoice" className="input-dropdown" name="rain"
+            <select id="betChoice" className="input-dropdown" name="betSelection"
               onChange={e => this.handleChoice(e.target.value)}>
                 <option value="0">Rain</option>
                 <option value="1">No Rain</option>
@@ -133,7 +178,7 @@ class App extends Component{
             <div className="spacer"></div>
 
             <div className="odds">
-              <div className="input-text">Current Odds: {this.state.odds}</div>
+              <div className="input-text">Potential Payout: {this.state.payout}</div>
               <div className="spacer"></div>
               <button className="refresh-button"
                 onClick={this.getOdds}
@@ -145,8 +190,7 @@ class App extends Component{
             <div className="spacer"></div>
 
             <button
-              className="submit-button" type="submit" value="Submit"
-              onClick={this.handleBet}>
+              className="submit-button" type="submit">
               Bet
             </button>
 

@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/Blockchain-GJM/WeatherBet#readme",
   "dependencies": {
-    "truffle": "^5.5.13"
+    "@truffle/hdwallet-provider": "^2.0.8",
+    "truffle": "^5.5.13",
+    "truffle-hdwallet-provider": "^1.0.17"
   }
 }

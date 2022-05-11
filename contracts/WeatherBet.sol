@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.8.0;
 
 contract WeatherBet {
     // Tunable variables
@@ -8,11 +8,11 @@ contract WeatherBet {
     address public manager;
     uint256 public createdTime; // backend needs to ensure this is called at the right time
 
-    address[] public rainBetsPlayers;
+    address payable[] public rainBetsPlayers;
     uint256[] public rainBetsAmount;
     uint256 public totalBetsonRain;
 
-    address[] public noRainBetsPlayers;
+    address payable[] public noRainBetsPlayers;
     uint256[] public noRainBetsAmount;
     uint256 public totalBetsonNoRain;
 
@@ -24,9 +24,9 @@ contract WeatherBet {
 
     uint8 public finalWeather;
 
-    constructor() public {
+    constructor() {
         manager = msg.sender;
-        createdTime = now;
+        createdTime = block.timestamp;
     }
 
     modifier restricted() {
@@ -63,17 +63,13 @@ contract WeatherBet {
         return finalWeather == uint8(Weather.rain);
     }
 
-    function getWonAmount(uint256 originalBet, bool hasRained)
+    function getWonAmount(uint256 originalBet, bool rained)
         private
         view
         returns (uint256)
     {
-        uint256 losingTotalBet = hasRained
-            ? totalBetsonNoRain
-            : totalBetsonRain;
-        uint256 winningTotalBet = hasRained
-            ? totalBetsonRain
-            : totalBetsonNoRain;
+        uint256 losingTotalBet = rained ? totalBetsonNoRain : totalBetsonRain;
+        uint256 winningTotalBet = rained ? totalBetsonRain : totalBetsonNoRain;
 
         return originalBet + (losingTotalBet * originalBet) / winningTotalBet;
     }
@@ -94,7 +90,7 @@ contract WeatherBet {
             : noRainBetsAmount;
 
         for (uint256 i = 0; i < winningPlayers.length; i++) {
-            address winner = winningPlayers[i];
+            address payable winner = winningPlayers[i];
             uint256 originalBet = winningBetAmount[i];
 
             uint256 wonAmout = getWonAmount(originalBet, hasRained());

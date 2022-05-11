@@ -1,5 +1,5 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const privateKey = require('./secrets.json').privateKey;
+const privateKey = require('./secrets.json').privateKey; // need to manually add; not tracked by git (see .gitignore)
 
 module.exports = {
   networks: {
@@ -9,8 +9,8 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
     },
     huygens: {
-      provider: () => new HDWalletProvider([privateKey], `https://huygens.ccn.org`),
-      network_id: 804,
+      provider: () => new HDWalletProvider([privateKey], `https://huygens.computecoin.network/`), // different from doc; updated per discord
+      network_id: 828, // different from doc; updated after the above line 
       confirmations: 10,
       timeoutBlocks: 200,
       skipDryRun: true

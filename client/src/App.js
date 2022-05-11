@@ -78,11 +78,17 @@ class App extends Component{
       })
   }
 
+  // open console, click "R" see data
+  // TODO: request upon opening page/refresh/make maybe even run every 30 seconds
   getOdds = event => {
     event.preventDefault()
-    console.log("Requesting Odds")
-    axios.get("http://localhost:3001/odds", {params: {rain_chosen: this.state.choose_rain}})
-      .then(res => this.setState({odds: res.data}))
+    console.log("Requesting Data")
+    axios.get("http://localhost:3001/data")
+      .then(res => {
+        console.log("CONTRACT: "+ res.data.contract)
+        console.log("RAIN: "+ res.data.rain)
+        console.log("NO RAIN: "+ res.data.norain)
+      })
   }
 
   render(){

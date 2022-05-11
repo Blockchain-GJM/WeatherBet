@@ -1,24 +1,11 @@
 {
-  "name": "weatherbet",
-  "version": "1.0.0",
-  "description": "Weather Betting Platform run on Solidity",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Blockchain-GJM/WeatherBet.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Blockchain-GJM/WeatherBet/issues"
-  },
-  "homepage": "https://github.com/Blockchain-GJM/WeatherBet#readme",
-  "dependencies": {
-    "@truffle/hdwallet-provider": "^2.0.8",
-    "truffle": "^5.5.13",
-    "truffle-hdwallet-provider": "^1.0.17"
+  "name": "hardhat-project",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "chai": "^4.3.6",
+    "ethereum-waffle": "^3.4.4",
+    "ethers": "^5.6.5",
+    "hardhat": "^2.9.3"
   }
 }

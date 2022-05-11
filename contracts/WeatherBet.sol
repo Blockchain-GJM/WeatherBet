@@ -1,9 +1,13 @@
+//SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
 contract WeatherBet {
     // Tunable variables
     uint256 private VALID_WINDOW = 24 hours;
     uint256 private MINIMUM_BET = 0.01 ether;
+
+    uint8 private RAIN = 1;
+    uint8 private NO_RAIN = 2;
 
     address public manager;
     uint256 public createdTime; // backend needs to ensure this is called at the right time
@@ -78,9 +82,13 @@ contract WeatherBet {
         return finalWeather == uint8(Weather.rain);
     }
 
+    function hasAnnounced() private view returns (bool) {
+        return finalWeather == RAIN || finalWeather == NO_RAIN;
+    }
+
     function payout(uint8 _finalWeather) public restricted {
         finalWeather = _finalWeather;
-        require(finalWeather != 0, "Weather has not been announced yet.");
+        require(hasAnnounced(), "Weather has not been announced yet.");
 
         address payable[] storage winningPlayers = isRain()
             ? rainBetsPlayers
@@ -97,8 +105,6 @@ contract WeatherBet {
 
             winner.transfer(wonAmout);
         }
-
-        resetBet();
     }
 
     function sendOriginalBetBackToRain() private restricted {

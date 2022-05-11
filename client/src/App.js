@@ -89,9 +89,10 @@ class App extends Component{
 
   }
 
+  // open console, click "R" see data
+  // TODO: request upon opening page/refresh/make maybe even run every 30 seconds
   getOdds = event => {
     event.preventDefault()
-
     //check validity of input
     if(isNaN(+(this.state.input))){
       console.log("Invalid Input")
@@ -99,7 +100,7 @@ class App extends Component{
     }
 
     console.log("Requesting Odds")
-    axios.get("http://localhost:3001/odds")
+    axios.get("http://localhost:3001/data")
       .then(res => this.handleOddsJson(res))
   }
 

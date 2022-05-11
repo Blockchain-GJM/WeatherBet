@@ -104,8 +104,6 @@ contract WeatherBet {
 
             winner.transfer(wonAmout);
         }
-
-        resetBet();
     }
 
     function sendOriginalBetBackToRain() private restricted {

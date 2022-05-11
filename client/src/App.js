@@ -86,7 +86,6 @@ class App extends Component{
     payment.approve(this.state.wallet, amt)
       .then((res)=>{console.log(res)})
 
-
   }
 
   // open console, click "R" see data
@@ -124,9 +123,7 @@ class App extends Component{
       return
     }
 
-
-
-    var payout = parseFloat(this.state.input) + lose_bet*(this.state.input*1.0/win_bet)
+    var payout = parseFloat(this.state.input) + lose_bet*(this.state.input*1.0/(win_bet+parseFloat(this.state.input)))
 
     this.setState({payout: payout})
   }

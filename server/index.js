@@ -1,12 +1,11 @@
 const express = require('express')
-//const mongoose = require('mongoose')
 const cors = require('cors')
 const schedule = require('node-schedule-tz')
-const fetch = require('node-fetch');
-require('dotenv/config')
+//const fetch = require('node-fetch')
+const fetch = (...args) =>
+    import('node-fetch').then(({default:fetch})=> fetch(...args))
 
 const SERVER_PORT = 3001
-
 
 const app = express()
 app.use(cors())
@@ -19,9 +18,6 @@ app.get('/', async (req, res) => {
 
 // GET DATA REQUEST
 app.get('/data', async (req, res) => {
-
-    console.log(req.query)
-
     // TODO fetch odds
     // TODO determine contract address
 

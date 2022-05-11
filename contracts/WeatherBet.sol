@@ -1,15 +1,12 @@
 pragma solidity ^0.4.17;
 
-// to do:
-// init (day D)
-// add time constraint
-
-// bet()
-// payout(rainVal)
-// payout = your_bet + floor(yourbet/yourTeambucket x losing team total)
-
 contract WeatherBet {
+    // Tunable variables
+    uint256 private VALID_WINDOW = 11 hours + 59 minutes + 59 seconds;
+    uint256 private MINIMUM_BET = 0.01 ether;
+
     address public manager;
+    uint256 public createdTime; // backend needs to ensure this is called at the right time
 
     address[] public rainBetsPlayers;
     uint256[] public rainBetsAmount;
@@ -26,10 +23,10 @@ contract WeatherBet {
     }
 
     uint8 public finalWeather;
-    uint256 private MINIMUM_BET = 0.01 ether;
 
     constructor() public {
         manager = msg.sender;
+        createdTime = now;
     }
 
     modifier restricted() {
@@ -42,13 +39,21 @@ contract WeatherBet {
         _;
     }
 
-    function enterWithRain() public payable hasSufficientFund {
+    modifier isValidTime() {
+        require(
+            block.timestamp <= createdTime + VALID_WINDOW,
+            "Time expired. Action rejected."
+        );
+        _;
+    }
+
+    function enterWithRain() public payable hasSufficientFund isValidTime {
         rainBetsPlayers.push(msg.sender);
         rainBetsAmount.push(msg.value);
         totalBetsonRain += msg.value;
     }
 
-    function enterWithNoRain() public payable hasSufficientFund {
+    function enterWithNoRain() public payable hasSufficientFund isValidTime {
         noRainBetsPlayers.push(msg.sender);
         noRainBetsAmount.push(msg.value);
         totalBetsonNoRain += msg.value;
@@ -58,8 +63,28 @@ contract WeatherBet {
         return finalWeather == uint8(Weather.rain);
     }
 
-    function pickWinner(uint8 _finalWeather) public restricted {
+    function getWonAmount(uint256 originalBet, bool hasRained)
+        private
+        view
+        returns (uint256)
+    {
+        uint256 losingTotalBet = hasRained
+            ? totalBetsonNoRain
+            : totalBetsonRain;
+        uint256 winningTotalBet = hasRained
+            ? totalBetsonRain
+            : totalBetsonNoRain;
+
+        return originalBet + (losingTotalBet * originalBet) / winningTotalBet;
+    }
+
+    function hasRained() private view returns (bool) {
+        return finalWeather == uint8(Weather.rain);
+    }
+
+    function payout(uint8 _finalWeather) public restricted {
         finalWeather = _finalWeather;
+        require(finalWeather != 0, "Weather has not been announced yet.");
 
         address[] storage winningPlayers = isRain()
             ? rainBetsPlayers
@@ -70,9 +95,35 @@ contract WeatherBet {
 
         for (uint256 i = 0; i < winningPlayers.length; i++) {
             address winner = winningPlayers[i];
-            uint256 wonAmout = winningBetAmount[i];
+            uint256 originalBet = winningBetAmount[i];
+
+            uint256 wonAmout = getWonAmount(originalBet, hasRained());
 
             winner.transfer(wonAmout);
+        }
+
+        resetBet();
+    }
+
+    function cancelBet() public restricted {
+        uint256 i;
+        uint256 originalBet;
+        address player;
+
+        // return money to those betting on rains
+        for (i = 0; i < rainBetsPlayers.length; i++) {
+            player = rainBetsPlayers[i];
+            originalBet = rainBetsAmount[i];
+
+            player.transfer(originalBet);
+        }
+
+        // return money to those betting on no rains
+        for (i = 0; i < noRainBetsPlayers.length; i++) {
+            player = noRainBetsPlayers[i];
+            originalBet = noRainBetsAmount[i];
+
+            player.transfer(originalBet);
         }
 
         resetBet();
@@ -88,6 +139,7 @@ contract WeatherBet {
         totalBetsonNoRain = 0;
 
         finalWeather = uint8(Weather.unannounced);
+        createdTime = block.timestamp;
     }
 
     function destroy() public {

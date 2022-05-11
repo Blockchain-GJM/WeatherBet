@@ -2,7 +2,7 @@ pragma solidity ^0.8.0;
 
 contract WeatherBet {
     // Tunable variables
-    uint256 private VALID_WINDOW = 11 hours + 59 minutes + 59 seconds;
+    uint256 private VALID_WINDOW = 24 hours;
     uint256 private MINIMUM_BET = 0.01 ether;
 
     address public manager;
@@ -48,13 +48,13 @@ contract WeatherBet {
     }
 
     function enterWithRain() public payable hasSufficientFund isValidTime {
-        rainBetsPlayers.push(msg.sender);
+        rainBetsPlayers.push(payable(msg.sender));
         rainBetsAmount.push(msg.value);
         totalBetsonRain += msg.value;
     }
 
     function enterWithNoRain() public payable hasSufficientFund isValidTime {
-        noRainBetsPlayers.push(msg.sender);
+        noRainBetsPlayers.push(payable(msg.sender));
         noRainBetsAmount.push(msg.value);
         totalBetsonNoRain += msg.value;
     }
@@ -82,7 +82,7 @@ contract WeatherBet {
         finalWeather = _finalWeather;
         require(finalWeather != 0, "Weather has not been announced yet.");
 
-        address[] storage winningPlayers = isRain()
+        address payable[] storage winningPlayers = isRain()
             ? rainBetsPlayers
             : noRainBetsPlayers;
         uint256[] storage winningBetAmount = isRain()
@@ -101,10 +101,10 @@ contract WeatherBet {
         resetBet();
     }
 
-    function cancelBet() public restricted {
+    function sendOriginalBetBackToRain() private restricted {
         uint256 i;
         uint256 originalBet;
-        address player;
+        address payable player;
 
         // return money to those betting on rains
         for (i = 0; i < rainBetsPlayers.length; i++) {
@@ -113,6 +113,12 @@ contract WeatherBet {
 
             player.transfer(originalBet);
         }
+    }
+
+    function sendOriginalBetBackToNoRain() private restricted {
+        uint256 i;
+        uint256 originalBet;
+        address payable player;
 
         // return money to those betting on no rains
         for (i = 0; i < noRainBetsPlayers.length; i++) {
@@ -121,16 +127,20 @@ contract WeatherBet {
 
             player.transfer(originalBet);
         }
+    }
 
+    function cancelBet() public restricted {
+        sendOriginalBetBackToRain();
+        sendOriginalBetBackToNoRain();
         resetBet();
     }
 
     function resetBet() private restricted {
-        rainBetsPlayers = new address[](0);
+        rainBetsPlayers = new address payable[](0);
         rainBetsAmount = new uint256[](0);
         totalBetsonRain = 0;
 
-        noRainBetsPlayers = new address[](0);
+        noRainBetsPlayers = new address payable[](0);
         noRainBetsAmount = new uint256[](0);
         totalBetsonNoRain = 0;
 
@@ -138,7 +148,9 @@ contract WeatherBet {
         createdTime = block.timestamp;
     }
 
-    function destroy() public {
-        selfdestruct(manager);
+    function destroy() public restricted {
+        sendOriginalBetBackToRain();
+        sendOriginalBetBackToNoRain();
+        selfdestruct(payable(manager));
     }
 }

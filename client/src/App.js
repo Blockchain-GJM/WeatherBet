@@ -1,7 +1,8 @@
 import React, { Component } from "react";
+import axios from 'axios';
 
 import './App.css';
-import axios from 'axios';
+
 
 class App extends Component{
 
@@ -45,7 +46,7 @@ class App extends Component{
 
         if(provider.isAle){
 
-          this.setState({wallet : {address : provider.account}, network_id: provider.networkId})
+          this.setState({wallet : provider.account, network_id: provider.networkId})
 
         } else {
           alert("Please use AleWallet")

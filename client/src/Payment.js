@@ -1,15 +1,31 @@
-import mcp from "mcp.js"
+import contract from "./contract"
 import Big from 'bignumber.js'
 
-export default {
-    async approve(wallet, limit){
-        const approveAmount = new Big(limit).times('1e18').toString()
-        const response = await mcp.request.sendBlock({
-            from: wallet,
-            to: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
-            amount: approveAmount
-        })
+export async function approve(wallet, limit){
 
-        return response
-    }
-}
+        console.log(contract.methods)
+
+        const approveAmount = new Big(limit).times('1e18').toString()
+
+        /*
+        const temp = await contract.Instance.methods.enterWithRain().call()
+            .then(data => {console.log(data)})
+        
+        console.log(contract.Instance.options.account)
+        console.log(contract.Instance.methods.createdTime.call())
+        console.log(contract.Instance.methods.totalBetsonRain.call())
+        console.log(contract.Instance.methods.totalBetsonNoRain.call())
+        */
+        
+        console.log(contract.methods.enterWithNoRain())
+
+        contract.methods.enterWithNoRain().sendBlock({
+            from: wallet.toString(),
+            password: "password",
+            amount: new Big(approveAmount).toString(),
+            gas_price: "200000000000",
+            gas: "20000000000000"
+        })
+        .then(res => {console.log(res)})
+        .catch(res => {console.log(res)})
+    };

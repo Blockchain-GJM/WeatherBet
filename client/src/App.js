@@ -1,18 +1,17 @@
 import React, { Component } from "react";
 import axios from 'axios';
 
-import payment from './Payment';
+import {approve} from './Payment';
 
 import './App.css';
 
 //0x13Bd352EcbbfD9Ccc7D4150d57D835600FB18c00
-
 class App extends Component{
 
   constructor(props) {
       super(props)
       this.state = {input: "0", choose_rain: true, wallet: null, network_id: null, payout:0,
-                    contract:null}
+                    contract:null, connected: false, locked: true}
   }
 
   checkWallet = () => {
@@ -22,7 +21,7 @@ class App extends Component{
 
         //there is a connected wallet
         button = <button className="connect-button button-primary"
-                    onClick={()=>this.logoutWalletHandler()}
+                    onClick={this.logoutWalletHandler}
                     >
                     Logout
                     </button>
@@ -31,7 +30,7 @@ class App extends Component{
         //wallet doesnt exist
         button = <button className="connect-button button-primary"
                     style={{ backgroundColor: "red", borderColor: "red"}}
-                    onClick={() => this.connectWalletHandler()}
+                    onClick={this.connectWalletHandler}
                     >
                     Connect Wallet
                     </button>
@@ -43,14 +42,20 @@ class App extends Component{
     this.setState({wallet: null})
   }
 
-  connectWalletHandler = () => {
-    console.log(window["aleereum"])
+  connectWalletHandler = async() => {
     if (window.aleereum){
         const provider = window["aleereum"]
 
         if(provider.isAle){
+          const connectStatus = provider.connect()
+          const isConnected = provider.isConnected
+          const islocked = provider.islocked
+          const networkId = provider.networkId
+          const account = provider.account
 
-          this.setState({wallet : provider.account, network_id: provider.networkId})
+          this.setState({wallet: account, network_id: networkId, connected: isConnected})
+
+
 
         } else {
           alert("Please use AleWallet")
@@ -83,7 +88,7 @@ class App extends Component{
     console.log(amt)
     console.log(rain_chosen)
     
-    payment.approve(this.state.wallet, amt)
+    approve(this.state.wallet, amt)
       .then((res)=>{console.log(res)})
 
   }

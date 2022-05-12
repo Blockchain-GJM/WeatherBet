@@ -22,7 +22,7 @@ app.get('/data', async (req, res) => {
     // TODO determine contract address
 
     // create JSON object
-    let data = {contract: "0xdeadbeef", rain: 100, norain: 80}
+    let data = {contract: "0x13Bd352EcbbfD9Ccc7D4150d57D835600FB18c00", rain: 100, norain: 80}
     console.log("SENDING: " + JSON.stringify(data))
     res.send(JSON.stringify(data))
 })

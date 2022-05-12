@@ -8,9 +8,15 @@ import './App.css';
 class App extends Component{
 
   constructor(props) {
-      super(props)
-      this.state = {input: "0", choose_rain: true, wallet: null, network_id: null, payout:0,
-                    contract:null, connected: false, locked: true}
+    super(props)
+    this.state = {input: "0", choose_rain: true, wallet: null, network_id: null, payout:0,
+                  contract:null, connected: false, locked: true}
+  }
+
+  componentDidMount(){
+    console.log("Requesting Odds")
+    axios.get("http://localhost:3001/data")
+      .then(res => this.handleOddsJson(res))
   }
 
   checkWallet = () => {
@@ -89,7 +95,7 @@ class App extends Component{
     console.log(password)
     console.log(rain_chosen)
     
-    approve(this.state.wallet, amt, password, rain_chosen)
+    approve(this.state.wallet, amt, password, rain_chosen, this.state.contract)
       .then((res)=>{console.log(res)})
   }
 

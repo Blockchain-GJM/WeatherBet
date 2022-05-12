@@ -5,7 +5,6 @@ import {approve} from './Payment';
 
 import './App.css';
 
-//0x13Bd352EcbbfD9Ccc7D4150d57D835600FB18c00
 class App extends Component{
 
   constructor(props) {
@@ -82,15 +81,16 @@ class App extends Component{
 
   handleBet = event => {
     event.preventDefault()
-    var amt = this.state.input
+    var amt = event.target.betAmount.value
+    var password = event.target.password.value
     var rain_chosen = this.state.choose_rain
 
     console.log(amt)
+    console.log(password)
     console.log(rain_chosen)
     
-    approve(this.state.wallet, amt)
+    approve(this.state.wallet, amt, password, rain_chosen)
       .then((res)=>{console.log(res)})
-
   }
 
   // open console, click "R" see data
@@ -151,8 +151,6 @@ class App extends Component{
           </div>
         </div>
 
-        <div style={{ marginTop: 20 }}>{JSON.stringify(this.state)}</div>
-
         <div className="bet-container">
 
           <form className="input-container" onSubmit={e => this.handleBet(e)}>
@@ -180,6 +178,14 @@ class App extends Component{
 
             <div className="spacer"></div>
 
+            <input
+                type="text"
+                name="password"
+                placeholder="password"
+                className="input-text"/>
+
+            <div className="spacer"></div>
+
             <div className="odds">
               <div className="input-text">Potential Payout: {this.state.payout}</div>
               <div className="spacer"></div>
@@ -192,10 +198,10 @@ class App extends Component{
 
             <div className="spacer"></div>
 
-            <button
+            {this.state.wallet && <button
               className="submit-button" type="submit">
               Bet
-            </button>
+            </button>}
 
           </form>
 

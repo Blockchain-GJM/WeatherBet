@@ -25,13 +25,19 @@ app.get('/data', async (req, res) => {
     // TODO fetch odds variables: totalBetsonRain, totalBetsonNoRain from Smart Contract
     console.log("getting odds")
 
-    const odds = await getOdds(CURRENT_CONTRACT)
+    try{
+        const odds = await getOdds(CURRENT_CONTRACT)
 
-    // create JSON object
-    let data = {contract: CURRENT_CONTRACT, rain: odds[0], norain: odds[1]}
+        // create JSON object
+        let data = {contract: CURRENT_CONTRACT, rain: odds[0], norain: odds[1]}
 
-    console.log("SENDING: " + JSON.stringify(data))
-    res.send(JSON.stringify(data))
+        console.log("SENDING: " + JSON.stringify(data))
+        res.send(JSON.stringify(data))
+    } catch (err) {
+        console.log(err)
+    }
+
+    
 })
 
 async function getOdds(contract_ad){
@@ -297,24 +303,28 @@ async function checkRainStatus(){
     let url = "https://api.weather.gov/stations/KNYC/observations"
     let settings = {method: "Get"}
 
-
-    let data = await fetch(url,settings)
-    let transformed = await data.json()
-    let rainStatus = false
-            for (const item of transformed.features){
-                checkDate = Date.parse(item.properties.timestamp)
-                if (lower.getTime() <= checkDate && checkDate <= upper.getTime()){
-                    for (const description of item.properties.presentWeather){
-                        for (const rain of rainTypes){
-                            if (description.weather.includes(rain)){
-                                // console.log(item.properties.timestamp, ": found rain")
-                                rainStatus = true
+    try{
+        let data = await fetch(url,settings)
+        let transformed = await data.json()
+        let rainStatus = false
+                for (const item of transformed.features){
+                    checkDate = Date.parse(item.properties.timestamp)
+                    if (lower.getTime() <= checkDate && checkDate <= upper.getTime()){
+                        for (const description of item.properties.presentWeather){
+                            for (const rain of rainTypes){
+                                if (description.weather.includes(rain)){
+                                    // console.log(item.properties.timestamp, ": found rain")
+                                    rainStatus = true
+                                }
                             }
                         }
                     }
                 }
-            }
-    return rainStatus
+        return rainStatus
+    } catch (err) {
+        console.log(err)
+    }
+    
 }
 
 // Gets the upperbound and lowerboudn date objects

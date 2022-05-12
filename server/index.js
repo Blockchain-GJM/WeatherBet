@@ -34,19 +34,12 @@ app.get('/data', async (req, res) => {
     res.send(JSON.stringify(data))
 })
 
-app.get('/reset', async (req, res) => {
-    // TODO fetch odds variables: totalBetsonRain, totalBetsonNoRain from Smart Contract
-    console.log("Reset")
-    doReset(CURRENT_CONTRACT)
-})
-
-
 async function getOdds(contract_ad){
     
     const contract = createContract(contract_ad)
 
-    const rainBet = await Promise.resolve(contract.methods.totalBetsonRain().call())
-    const noRainBet = await Promise.resolve(contract.methods.totalBetsonNoRain().call())
+    const rainBet = Promise.resolve(contract.methods.totalBetsonRain().call())
+    const noRainBet = Promise.resolve(contract.methods.totalBetsonNoRain().call())
 
     console.log(promiseToFloat(rainBet))
 

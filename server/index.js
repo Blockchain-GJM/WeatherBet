@@ -4,7 +4,9 @@ const express = require('express')
 const cors = require('cors')
 const schedule = require('node-schedule-tz')
 const fetch = (...args) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(...args));
+  import('node-fetch').then(({ default: fetch }) => fetch(...args)).catch((err) => {
+    console.log(err);
+});;
 require('dotenv/config')
 
 const SERVER_PORT = 3001
@@ -22,7 +24,6 @@ app.get('/', async (req, res) => {
 
 // GET DATA REQUEST
 app.get('/data', async (req, res) => {
-    // TODO fetch odds variables: totalBetsonRain, totalBetsonNoRain from Smart Contract
     console.log("getting odds")
 
     try{
@@ -121,20 +122,6 @@ const jobNoon = schedule.scheduleJob(ruleNoon, function(){
     contractTimeStep();
 });
 
-
-
-// TODO DELETE THIS
-// TESTER
-let i = 0;
-
-//*/10 * * * * *
-var event = schedule.scheduleJob("*/5 * * * *", function() {
-    console.log("TIME: ", i)
-    contractTimeStep();
-    i += 1
-});
-// TESTER
-
 //////////////////////////////////////
 
 
@@ -195,25 +182,20 @@ function contractTimeStep(){
 /////////////////////////////////////
 
 async function doReset(contract_ad){
-    // TODO
+    
     // reset and open smartcontract call resetBet() as manager
     const contract = createContract(contract_ad)
 
-    try{
-
-        contract.methods.resetBet().sendBlock({
-            from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
-            password: "12121212",
-            amount: new Big("0").toString(),
-            gas_price: "20000000000",
-            gas: "2000000"
-        }).then(res => {console.log(res)})
-
-    } catch(err) {
-        console.log("ERROR")
-        console.log(err)
-    }
-
+    contract.methods.resetBet().sendBlock({
+        from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
+        password: "12121212",
+        amount: new Big("0").toString(),
+        gas_price: "20000000000",
+        gas: "2000000"
+    }).then(res => {console.log(res)
+    }).catch((err) => {
+        console.log(err);
+    });
     return 0
 }
 //////////////////////////////////////
@@ -225,25 +207,20 @@ async function doReset(contract_ad){
 /////////////////////////////////////
 
 function doExpire(contract_ad){
-    // TODO
+    
     // expire smartcontract call setExpired() as manager
-
     const contract = createContract(contract_ad)
 
-    try{
-
-        contract.methods.setExpired().sendBlock({
-            from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
-            password: "12121212",
-            amount: new Big("0").toString(),
-            gas_price: "20000000000",
-            gas: "2000000"
-        }).then(res => {console.log(res)})
-
-    } catch(err) {
-        console.log("ERROR")
-        console.log(err)
-    }
+    contract.methods.setExpired().sendBlock({
+        from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
+        password: "12121212",
+        amount: new Big("0").toString(),
+        gas_price: "20000000000",
+        gas: "2000000"
+    }).then(res => {console.log(res)
+    }).catch((err) => {
+        console.log(err);
+    });
 
 
     return 0
@@ -262,29 +239,28 @@ async function doPayouts(contract_ad){
     let rainStatus = await checkRainStatus()
     console.log("RAIN STATUS: ", rainStatus)
     
-    let arg = 0 // follow logic
+    let arg = 0 
     if (rainStatus == true) {
         arg = 1
     }
-    
-    // TODO
+    else if (rainStatus == false){
+        arg = 2
+    }
+
     // do payouts on blockchain call payout(arg)
     const contract = createContract(contract_ad)
 
-    try{
+    contract.methods.payout(arg).sendBlock({
+        from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
+        password: "12121212",
+        amount: new Big("0").toString(),
+        gas_price: "20000000000",
+        gas: "2000000"
+    }).then(res => {console.log(res)
+    }).catch((err) => {
+        console.log(err);
+    });
 
-        contract.methods.payout(arg).sendBlock({
-            from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
-            password: "12121212",
-            amount: new Big("0").toString(),
-            gas_price: "20000000000",
-            gas: "2000000"
-        }).then(res => {console.log(res)})
-
-    } catch(err) {
-        console.log("ERROR")
-        console.log(err)
-    }
 };
  
 
@@ -323,6 +299,7 @@ async function checkRainStatus(){
         return rainStatus
     } catch (err) {
         console.log(err)
+        return NaN
     }
     
 }
@@ -330,10 +307,6 @@ async function checkRainStatus(){
 // Gets the upperbound and lowerboudn date objects
 function getDateStrings(){
     let now = new Date(Date.parse((new Date()).toUTCString()))
-    
-    // TODO DELETE THIS
-    // Test for May 6-7
-    now.setDate(6)
     
     let upperBound = new Date(now)
     // upperbound is New York 11:59pm

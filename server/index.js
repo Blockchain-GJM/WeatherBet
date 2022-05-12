@@ -6,8 +6,9 @@ const fetch = (...args) =>
 require('dotenv/config')
 
 const SERVER_PORT = 3001
-const CONTRACTS = {"A": {address: "0x13Bd352EcbbfD9Ccc7D4150d57D835600FB18c00", state: "", state_count: 0}, "B": {address: "2", state: "", state_count: 0}, "C": {address: "3", state: "", state_count: 0}}
-let INIT_FLAG = false
+const CONTRACTS = {"A": {address: "0x3812a1e425068Ac2a33f8d02B925f839570736DF", state: "", state_count: 0}, "B": {address: "0x0EBFDF72DC870d8daAF5740c5163D6FAf7797FD2", state: "", state_count: 0}, "C": {address: "0x3807E9375B2003d408d1BcA19f688c5495a69879", state: "", state_count: 0}}
+let CURRENT_CONTRACT = CONTRACTS["A"].address
+
 
 const app = express()
 app.use(cors())
@@ -20,11 +21,11 @@ app.get('/', async (req, res) => {
 
 // GET DATA REQUEST
 app.get('/data', async (req, res) => {
-    // TODO fetch odds
-    // TODO determine contract address
+    // TODO fetch odds variables: totalBetsonRain, totalBetsonNoRain from Smart Contract
+    
 
     // create JSON object
-    let data = {contract: "0x13Bd352EcbbfD9Ccc7D4150d57D835600FB18c00", rain: 100, norain: 80}
+    let data = {contract: CURRENT_CONTRACT, rain: 100, norain: 80}
     console.log("SENDING: " + JSON.stringify(data))
     res.send(JSON.stringify(data))
 })
@@ -41,14 +42,14 @@ app.listen(SERVER_PORT, ()=>{
 
 // Scheduler Ruleset for payout
 const ruleMidnight = new schedule.RecurrenceRule();
-rule.hour = 23;
-rule.minute = 59;
-rule.tz = 'America/New_York'
+ruleMidnight.hour = 23;
+ruleMidnight.minute = 59;
+ruleMidnight.tz = 'America/New_York'
 
 const ruleNoon = new schedule.RecurrenceRule();
-rule.hour = 11;
-rule.minute = 59;
-rule.tz = 'America/New_York'
+ruleNoon.hour = 11;
+ruleNoon.minute = 59;
+ruleNoon.tz = 'America/New_York'
 
 // Test rule, run every minute when seconds == 4
 // const ruleTest = new schedule.RecurrenceRule();
@@ -82,6 +83,7 @@ var event = schedule.scheduleJob("*/10 * * * * *", function() {
 /// CONTRACT ROTATION LOGIC
 //////////////////////////////////////
 function contractInit(){
+    
     CONTRACTS.A.state = "stale"
     CONTRACTS.A.state_count = 0
 
@@ -133,7 +135,8 @@ function contractTimeStep(){
 /////////////////////////////////////
 
 function doReset(contract){
-    // reset and open smartcontract
+    // TODO
+    // reset and open smartcontract call resetBet() as manager
     return 0
 }
 //////////////////////////////////////
@@ -145,7 +148,8 @@ function doReset(contract){
 /////////////////////////////////////
 
 function doExpire(contract){
-    // expire smartcontract
+    // TODO
+    // expire smartcontract call setExpired() as manager
     return 0
 }
 //////////////////////////////////////
@@ -162,7 +166,13 @@ async function doPayouts(contract){
     let rainStatus = await checkRainStatus()
     console.log("RAIN STATUS: ", rainStatus)
     
-    // do payouts on blockchain
+    let arg = 0 // follow logic
+    if (rainStatus == true) {
+        arg = 1
+    }
+    
+    // TODO
+    // do payouts on blockchain call payout(arg)
 };
  
 

@@ -8,9 +8,8 @@ const fetch = (...args) =>
 require('dotenv/config')
 
 const SERVER_PORT = 3001
-const CONTRACTS = {"A": {address: "0x3812a1e425068Ac2a33f8d02B925f839570736DF", state: "", state_count: 0}, "B": {address: "0x0EBFDF72DC870d8daAF5740c5163D6FAf7797FD2", state: "", state_count: 0}, "C": {address: "0x3807E9375B2003d408d1BcA19f688c5495a69879", state: "", state_count: 0}}
+const CONTRACTS = {"A": {address: "0x639eaA95905F141ff1d43B08D287C8d21789E582", state: "", state_count: 0}, "B": {address: "0x29a83915F25BB3092EbdDb8eC47c92f3C3D62AEA", state: "", state_count: 0}, "C": {address: "0x8D586141605C08002E3c87f9c6aF31282528413F", state: "", state_count: 0}}
 let CURRENT_CONTRACT = CONTRACTS["A"].address
-
 
 const app = express()
 app.use(cors())
@@ -27,7 +26,6 @@ app.get('/data', async (req, res) => {
     console.log("getting odds")
 
     const odds = await getOdds(CURRENT_CONTRACT)
-    console.log(odds)
 
     // create JSON object
     let data = {contract: CURRENT_CONTRACT, rain: odds[0], norain: odds[1]}
@@ -36,12 +34,11 @@ app.get('/data', async (req, res) => {
     res.send(JSON.stringify(data))
 })
 
-app.get('/dataReset', async (req, res) => {
+app.get('/reset', async (req, res) => {
     // TODO fetch odds variables: totalBetsonRain, totalBetsonNoRain from Smart Contract
-    console.log("RESETTING")
+    console.log("Reset")
     doReset(CURRENT_CONTRACT)
 })
-
 
 
 async function getOdds(contract_ad){
@@ -203,22 +200,21 @@ async function doReset(contract_ad){
     // reset and open smartcontract call resetBet() as manager
     const contract = createContract(contract_ad)
 
-    console.log(contract.methods)
+    try{
 
-    const temp = await Promise.resolve(contract.methods.cancelBet().call({
-        from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
-        password: "12121212"}))
+        contract.methods.resetBet().sendBlock({
+            from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
+            password: "12121212",
+            amount: new Big("0").toString(),
+            gas_price: "20000000000",
+            gas: "2000000"
+        }).then(res => {console.log(res)})
 
-    /*
-    await contract.methods.cancelBet().sendBlocks({
-        from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
-        password: "12121212",
-        amount: new Big("0").toString(),
-        gas_price: "20000000000",
-        gas: "2000000"
-    })
-    */
-    console.log(temp)
+    } catch(err) {
+        console.log("ERROR")
+        console.log(err)
+    }
+
     return 0
 }
 //////////////////////////////////////
@@ -229,9 +225,28 @@ async function doReset(contract_ad){
 /// EXPIRE LOGIC
 /////////////////////////////////////
 
-function doExpire(contract){
+function doExpire(contract_ad){
     // TODO
     // expire smartcontract call setExpired() as manager
+
+    const contract = createContract(contract_ad)
+
+    try{
+
+        contract.methods.setExpired().sendBlock({
+            from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
+            password: "12121212",
+            amount: new Big("0").toString(),
+            gas_price: "20000000000",
+            gas: "2000000"
+        }).then(res => {console.log(res)})
+
+    } catch(err) {
+        console.log("ERROR")
+        console.log(err)
+    }
+
+
     return 0
 }
 //////////////////////////////////////
@@ -242,7 +257,7 @@ function doExpire(contract){
 /// PAYOUTS LOGIC
 /////////////////////////////////////
 
-async function doPayouts(contract){
+async function doPayouts(contract_ad){
     console.log("======= RUNNING PAYOUT SCRIPT =======")
     
     let rainStatus = await checkRainStatus()
@@ -255,6 +270,22 @@ async function doPayouts(contract){
     
     // TODO
     // do payouts on blockchain call payout(arg)
+    const contract = createContract(contract_ad)
+
+    try{
+
+        contract.methods.payout(arg).sendBlock({
+            from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
+            password: "12121212",
+            amount: new Big("0").toString(),
+            gas_price: "20000000000",
+            gas: "2000000"
+        }).then(res => {console.log(res)})
+
+    } catch(err) {
+        console.log("ERROR")
+        console.log(err)
+    }
 };
  
 

@@ -9,7 +9,9 @@ Authors: George Litvinov (gl2157), Maximo Oen (mmo2134), Jacky Wong (hw2813)
 # Usage
 
 **Smart-Contracts:** `npm install` in root directory then deploy via hardhat
+
 **Front-End Client:** `npm install && npm start` in `/client` directory
+
 **Back-End Server:** `npm install && node index.js` in `/server` directory
 
 # Abstract

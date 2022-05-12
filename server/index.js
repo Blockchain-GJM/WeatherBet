@@ -40,8 +40,13 @@ app.listen(SERVER_PORT, ()=>{
 //////////////////////////////////////
 
 // Scheduler Ruleset for payout
-const rule = new schedule.RecurrenceRule();
+const ruleMidnight = new schedule.RecurrenceRule();
 rule.hour = 23;
+rule.minute = 59;
+rule.tz = 'America/New_York'
+
+const ruleNoon = new schedule.RecurrenceRule();
+rule.hour = 11;
 rule.minute = 59;
 rule.tz = 'America/New_York'
 
@@ -49,9 +54,15 @@ rule.tz = 'America/New_York'
 // const ruleTest = new schedule.RecurrenceRule();
 // ruleTest.second = 4
 
-const job = schedule.scheduleJob(rule, function(){
+const jobMidnight = schedule.scheduleJob(ruleMidnight, function(){
     contractTimeStep();
 });
+
+const jobNoon = schedule.scheduleJob(ruleNoon, function(){
+    contractTimeStep();
+});
+
+
 
 // TODO DELETE THIS
 // TESTER

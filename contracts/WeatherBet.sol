@@ -10,7 +10,9 @@ contract WeatherBet {
     uint8 private NO_RAIN = 2;
 
     address public manager;
+
     uint256 public createdTime; // backend needs to ensure this is called at the right time
+    bool expired;
 
     address payable[] public rainBetsPlayers;
     uint256[] public rainBetsAmount;
@@ -45,7 +47,8 @@ contract WeatherBet {
 
     modifier isValidTime() {
         require(
-            block.timestamp <= createdTime + VALID_WINDOW,
+            !expired,
+            // block.timestamp <= createdTime + VALID_WINDOW,
             "Time expired. Action rejected."
         );
         _;
@@ -135,6 +138,10 @@ contract WeatherBet {
         }
     }
 
+    function setExpired() public restricted {
+        expired = true;
+    }
+
     function cancelBet() public restricted {
         sendOriginalBetBackToRain();
         sendOriginalBetBackToNoRain();
@@ -152,6 +159,7 @@ contract WeatherBet {
 
         finalWeather = uint8(Weather.unannounced);
         createdTime = block.timestamp;
+        expired = false;
     }
 
     function destroy() public restricted {

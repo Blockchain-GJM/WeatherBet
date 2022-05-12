@@ -4,9 +4,7 @@ const express = require('express')
 const cors = require('cors')
 const schedule = require('node-schedule-tz')
 const fetch = (...args) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(...args)).catch((err) => {
-    console.log(err);
-});;
+  import('node-fetch').then(({ default: fetch }) => fetch(...args));
 require('dotenv/config')
 
 const SERVER_PORT = 3001

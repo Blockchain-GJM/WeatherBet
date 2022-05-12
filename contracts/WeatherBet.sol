@@ -148,7 +148,7 @@ contract WeatherBet {
         resetBet();
     }
 
-    function resetBet() private restricted {
+    function resetBet() public restricted {
         rainBetsPlayers = new address payable[](0);
         rainBetsAmount = new uint256[](0);
         totalBetsonRain = 0;

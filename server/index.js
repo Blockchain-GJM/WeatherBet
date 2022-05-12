@@ -137,6 +137,7 @@ function contractTimeStep(){
 function doReset(contract){
     // TODO
     // reset and open smartcontract call resetBet() as manager
+    console.log(CONTRACTS[contract].address)
     return 0
 }
 //////////////////////////////////////

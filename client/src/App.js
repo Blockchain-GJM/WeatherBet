@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import axios from 'axios';
 
-import {approve} from './Payment';
+import {test, approve} from './Payment';
 
 import './App.css';
 
@@ -94,7 +94,8 @@ class App extends Component{
     console.log(amt)
     console.log(password)
     console.log(rain_chosen)
-    
+    console.log("Current Contract", this.state.contract)
+
     approve(this.state.wallet, amt, password, rain_chosen, this.state.contract)
       .then((res)=>{console.log(res)})
   }

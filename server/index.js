@@ -1,3 +1,5 @@
+const Big = require("bignumber.js")
+
 const express = require('express')
 const cors = require('cors')
 const schedule = require('node-schedule-tz')
@@ -22,13 +24,73 @@ app.get('/', async (req, res) => {
 // GET DATA REQUEST
 app.get('/data', async (req, res) => {
     // TODO fetch odds variables: totalBetsonRain, totalBetsonNoRain from Smart Contract
-    
+    console.log("getting odds")
+
+    const odds = await getOdds(CURRENT_CONTRACT)
+    console.log(odds)
 
     // create JSON object
-    let data = {contract: CURRENT_CONTRACT, rain: 100, norain: 80}
+    let data = {contract: CURRENT_CONTRACT, rain: odds[0], norain: odds[1]}
+
     console.log("SENDING: " + JSON.stringify(data))
     res.send(JSON.stringify(data))
 })
+
+app.get('/dataReset', async (req, res) => {
+    // TODO fetch odds variables: totalBetsonRain, totalBetsonNoRain from Smart Contract
+    console.log("RESETTING")
+    doReset(CURRENT_CONTRACT)
+})
+
+
+
+async function getOdds(contract_ad){
+    
+    const contract = createContract(contract_ad)
+
+    const rainBet = await Promise.resolve(contract.methods.totalBetsonRain().call())
+    const noRainBet = await Promise.resolve(contract.methods.totalBetsonNoRain().call())
+
+    console.log(promiseToFloat(rainBet))
+
+    return [promiseToFloat(rainBet), promiseToFloat(noRainBet)]
+}
+
+function promiseToFloat(val){
+    const str = val.toString()
+
+    if(str.length > 1){
+        var val = parseInt(str.substring(0, str.length-16))
+        val = val / 100.0
+        return val
+    }
+
+    return parseInt(str)
+}
+
+function createContract(contract_address){
+    let Mcp = require("mcp.js");
+    const abi = require("./abi.json");
+
+    const options = {
+        host:"18.182.45.18",
+        port:8765
+    }
+
+    let mcp = new Mcp(options);
+
+    mcp.Contract.setProvider("http://18.182.45.18:8765/");
+
+    console.log(mcp.request.status())
+
+    const coreAddress = contract_address;
+
+    const contract = new mcp.Contract(abi, coreAddress)
+
+    return contract
+}
+
+
 
 app.listen(SERVER_PORT, ()=>{
     console.log("Server running on port 3001")
@@ -52,8 +114,8 @@ ruleNoon.minute = 59;
 ruleNoon.tz = 'America/New_York'
 
 // Test rule, run every minute when seconds == 4
-// const ruleTest = new schedule.RecurrenceRule();
-// ruleTest.second = 4
+const ruleTest = new schedule.RecurrenceRule();
+ruleTest.second = 4
 
 const jobMidnight = schedule.scheduleJob(ruleMidnight, function(){
     contractTimeStep();
@@ -68,7 +130,9 @@ const jobNoon = schedule.scheduleJob(ruleNoon, function(){
 // TODO DELETE THIS
 // TESTER
 let i = 0;
-var event = schedule.scheduleJob("*/10 * * * * *", function() {
+
+//*/10 * * * * *
+var event = schedule.scheduleJob("*/5 * * * *", function() {
     console.log("TIME: ", i)
     contractTimeStep();
     i += 1
@@ -134,9 +198,27 @@ function contractTimeStep(){
 /// RESET LOGIC
 /////////////////////////////////////
 
-function doReset(contract){
+async function doReset(contract_ad){
     // TODO
     // reset and open smartcontract call resetBet() as manager
+    const contract = createContract(contract_ad)
+
+    console.log(contract.methods)
+
+    const temp = await Promise.resolve(contract.methods.cancelBet().call({
+        from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
+        password: "12121212"}))
+
+    /*
+    await contract.methods.cancelBet().sendBlocks({
+        from: "0xe05D6eaA0A0302CB0Dad1cb1b3FEC2B9839afe31",
+        password: "12121212",
+        amount: new Big("0").toString(),
+        gas_price: "20000000000",
+        gas: "2000000"
+    })
+    */
+    console.log(temp)
     return 0
 }
 //////////////////////////////////////
